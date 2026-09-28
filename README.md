@@ -134,19 +134,22 @@ sudo tail -30 /run/arda-demo/hostapd.log
 
 **정상 결과:** `ARDA_NET 준비 완료`가 출력됩니다. Wi-Fi 장치는 `unmanaged`, 주소는 `192.168.10.1/24`, `iw`는 `type AP`, hostapd 로그는 `AP-ENABLED`를 보여줍니다. 센서 서비스는 계속 `active`입니다.
 
-**문제 시 확인:** 시작 출력의 `시작 실패 (줄 …)`, hostapd 로그, `journalctl -u arda-jetson.service -b -n 80`을 확인합니다. 
-종료하려면 
+**문제 시 확인:** 시작 출력의 `시작 실패 (줄 …)`, hostapd 로그, `journalctl -u arda-jetson.service -b -n 80`을 확인합니다. AP만 종료하고 Wi-Fi로 돌아가려면:
+
 ```bash
 sudo ./scripts/demo_stop.sh
 ```
- 를 실행합니다.
 
-```bash
 ### STEP 2 — Windows에서 AP 접속과 IP 확인
+
+**접속 정보:**
+
+- Wi-Fi 이름(SSID): **`ARDA_NET`**
+- Wi-Fi 암호: **`arda2026`** (`config/hostapd.conf`의 현재 값)
 
 **실행 — Windows:**
 
-1. Wi-Fi 목록에서 `ARDA_NET`에 연결합니다.
+1. Wi-Fi 목록에서 `ARDA_NET`을 선택하고 위 암호를 입력합니다.
 2. PowerShell에서 다음을 실행합니다.
 
 ```powershell
@@ -154,7 +157,9 @@ ipconfig /all
 ping 192.168.10.1
 ```
 
-**정상 결과:** `ARDA_NET`에 연결된 **Wi-Fi 어댑터**의 IPv4가 `192.168.10.10`~`192.168.10.100`이고, DHCP 서버는 `192.168.10.1`입니다. `ping`에 응답이 옵니다. **이 IPv4 주소를 기록하세요.** 예: `192.168.10.49`.
+> **⚠️ 중요 — 인터넷 상태 표시와 AP 연결은 다릅니다.** 이 AP는 인터넷을 제공하지 않습니다. Windows가 “인터넷 없음”, “인터넷에 연결되지 않음” 또는 제한된 연결처럼 표시해도 **Wi-Fi 어댑터의 IPv4가 `192.168.10.x`이고 Jetson(`192.168.10.1`)으로 ping이 되면 로컬 연결은 성공**입니다. Windows의 인터넷 표시만 보고 실패로 판단하지 마세요.
+
+**정상 결과:** `ARDA_NET`에 연결된 **Wi-Fi 어댑터**의 IPv4가 `192.168.10.10`~`192.168.10.100`, 서브넷 마스크가 `255.255.255.0`, DHCP 서버가 `192.168.10.1`입니다. `ping`에 응답이 옵니다. **Windows IPv4 주소를 기록하세요.** 예: `192.168.10.49`. 다음 STEP에서 웹 전송 주소로 사용합니다.
 
 **문제 시 확인:** `169.254.x.x`면 DHCP 실패입니다. Jetson에서 아래 로그를 확인합니다.
 
