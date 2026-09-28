@@ -2,6 +2,8 @@
 
 Jetson Orin Nano · JetPack 6.2 · Ubuntu 22.04 · NetworkManager 기준입니다.
 
+아래 명령의 `~/ARDA-2026/jetson`은 현재 Jetson의 실제 경로입니다. 다른 위치에 clone했다면 그 경로로 바꾸세요.
+
 > **AP 전환은 Jetson의 현재 Wi-Fi를 끊습니다.** `start_demo.sh`와 `stop_demo.sh`는 Jetson 로컬 터미널 또는 USB/유선 연결에서 실행하세요. 이 폴더를 구성하면서 실제 AP 전환은 실행하지 않았습니다.
 
 ## 1. Jetson이 하는 일
@@ -66,7 +68,7 @@ sudo apt install -y hostapd dnsmasq iw iproute2 network-manager \
 **실행:**
 
 ```bash
-cd /path/to/jetson/arda-raset
+cd ~/ARDA-2026/jetson/arda-raset
 uv sync --frozen
 # YOLO 사용 시에만: uv sync --frozen --extra yolo
 ```
@@ -80,7 +82,7 @@ uv sync --frozen
 **실행:**
 
 ```bash
-cd /path/to/jetson
+cd ~/ARDA-2026/jetson
 nmcli device status
 ls -l /dev/ttyUSB* /dev/i2c-* 2>/dev/null
 id
@@ -103,7 +105,7 @@ i2cdetect -l
 **실행 — 일반 사용자로:**
 
 ```bash
-cd /path/to/jetson
+cd ~/ARDA-2026/jetson
 ./scripts/install_service.sh
 sudo systemctl start arda-jetson.service
 systemctl status arda-jetson.service --no-pager
@@ -122,7 +124,7 @@ systemctl status arda-jetson.service --no-pager
 **실행 — Jetson 로컬 터미널:**
 
 ```bash
-cd /path/to/jetson
+cd ~/ARDA-2026/jetson
 ./scripts/start_demo.sh
 nmcli device status
 ip -4 addr show dev wlP1p1s0
@@ -183,7 +185,7 @@ netsh advfirewall firewall add rule name="ARDA hanriver" dir=in action=allow pro
 **실행 — Jetson:** STEP 2에서 기록한 주소가 `192.168.10.49`라면 설정 파일을 열 필요 없이 다음처럼 입력합니다.
 
 ```bash
-cd /path/to/jetson
+cd ~/ARDA-2026/jetson
 ./scripts/set_report_url.sh http://192.168.10.49:8000/report
 curl -m 3 http://192.168.10.49:8000/state
 journalctl -u arda-jetson.service -b -n 40 --no-pager
