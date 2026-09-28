@@ -1,0 +1,17 @@
+[Unit]
+Description=ARDA Jetson radar servo thermal runtime
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+Group=@GROUP@
+WorkingDirectory=@ROOT@/arda-raset
+ExecStart=@ROOT@/scripts/run_sensor.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

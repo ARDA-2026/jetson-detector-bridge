@@ -1,0 +1,7 @@
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.logs/
+**/data/logs/
+services/arda-jetson.service
+*.pyc

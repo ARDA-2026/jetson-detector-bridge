@@ -1,0 +1,53 @@
+radar:
+  cli_port: "/dev/ttyUSB0"
+  data_port: "/dev/ttyUSB1"
+  config_file: "config/profiles/xwr68xx_AOP_profile_short_range.cfg"
+
+# main.py와 scripts/ 아래 실시간·분석 스크립트들이 공통으로 읽는
+# 전처리/타겟 선택 튜닝값 (arda.utils.load_processing_config).
+# 이전엔 각 스크립트 상단에 동일한 값이 개별 상수로 중복 정의돼 있었다 —
+# 여기 한 곳만 고치면 전부에 반영된다.
+processing:
+  min_snr: 6.0           # 작은 물체의 약한 반사도 포착
+  roi:
+    x: [-1.0, 1.0]      # 좌우 ±1.0m
+    y: [0.2, 1.2]       # 센서 전방 0.0~1.0m
+    z: [-1.2, 0.8]      # 바닥 근처~선 키
+  min_abs_doppler: 0.05  # 느린 낙하 포인트도 포착 (main.py의 filter_stationary 전용)
+  cluster_eps: 0.15      # m — 10cm 물체 기준: 포인트 간 최대 거리 (물체 크기 + 측정 오차)
+  cluster_min_samples: 2 # 단일 노이즈 포인트 제거, 10cm 물체는 보통 2개 이상 반환
+  max_jump: 0.5          # m — 트랙 예측 위치 기준 클러스터 매칭 허용 거리 (다중 추적)
+
+detection:
+  history_window: 6
+  height_drop_threshold: 0.3   # 조건 A: 윈도우 내 높이 변화량
+  fall_doppler_threshold: -0.2  # 도플러 기준 (radial 성분 보정)
+  z_velocity_threshold: -0.3   # 조건 B: 프레임 간 Z 순간 속도 (자유낙하 1프레임 내 감지)
+
+visualization:
+  enabled: true
+
+# 이 레이더가 설치된 지점의 위도/경도(WGS84, 도 단위)와 정면(Y축, boresight)
+# 방위각. 낙하 확정 시 센서 기준 로컬 좌표(X,Y)를 heading_deg만큼 회전시켜
+# 동/북 변위로 바꾼 뒤 위도/경도에 더한다 — 회전 덕분에 기기가 어느 방향을
+# 보고 설치되든(반드시 정북일 필요 없음) 로컬 좌표의 부호·축이 방향에 맞게
+# 자동으로 계산된다 (arda/utils/site.py의 local_to_latlon() 참고).
+# lat/lon은 반드시 실측(GPS)값으로 바꿔야 한다 — 아래는 자리표시용 예시값 (마포대교 중간지점 남동 방향).
+site:
+  # ⚠️ lat/lon/heading_deg는 arda-raset(main.py)이 raset으로 실행할 때는
+  # 더 이상 읽지 않는다 — arda-raset/main.py 상단의 DEFAULT_SITE_LAT/
+  # DEFAULT_SITE_LON/DEFAULT_SITE_HEADING_DEG(또는 --site-lat 등 실행 인자)로
+  # 하나로 통일했다(report_url과 같은 이유). 여기 값은 arda-radar를 이
+  # 저장소 단독으로 실행할 때만(main.py) 실제로 쓰인다 — 그때는 이 값을
+  # 그대로 고칠 것.
+  lat: 37.5336       # 설치 지점 위도 (도)
+  lon: 126.9364       # 설치 지점 경도 (도)
+  heading_deg: 320.0    # 센서 정면(Y축)이 향하는 나침반 방위각 (정북 0°, 시계방향 동 90°)
+  # ⚠️ 이 값은 arda-radar 자신도, arda-raset도 더 이상 읽지 않는다(둘 다
+  # report_url 전송을 안 하거나 다른 곳에서 값을 가져옴) — 완전히 미사용
+  # 상태로 참고용으로만 남아있다. arda-raset(main.py)에서 report_url을
+  # 바꾸려면 arda-raset/main.py 상단의 DEFAULT_REPORT_URL을 고치거나
+  # --report-url로 실행 시 넘길 것 — 그쪽이 열화상 스트리밍/낙하 확정
+  # 좌표 전송을 전부 담당하는 단일 값이다. arda-radar를 이 저장소 단독으로
+  # 실행할 때도 report_url은 실제로 쓰이지 않는다(main.py 참고).
+  report_url: "http://172.30.139.125:8000/report"
