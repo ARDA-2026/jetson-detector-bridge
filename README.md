@@ -135,8 +135,13 @@ sudo tail -30 /run/arda-demo/hostapd.log
 **정상 결과:** `ARDA_NET 준비 완료`가 출력됩니다. Wi-Fi 장치는 `unmanaged`, 주소는 `192.168.10.1/24`, `iw`는 `type AP`, hostapd 로그는 `AP-ENABLED`를 보여줍니다. 센서 서비스는 계속 `active`입니다.
 
 **문제 시 확인:** 시작 출력의 `시작 실패 (줄 …)`, hostapd 로그, `journalctl -u arda-jetson.service -b -n 80`을 확인합니다. 
-종료하려면 `sudo ./scripts/demo_stop.sh`를 실행합니다.
+종료하려면 
+```bash
+sudo ./scripts/demo_stop.sh
+```
+ 를 실행합니다.
 
+```bash
 ### STEP 2 — Windows에서 AP 접속과 IP 확인
 
 **실행 — Windows:**
