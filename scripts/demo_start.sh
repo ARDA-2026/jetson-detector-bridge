@@ -30,7 +30,7 @@ rollback() {
     if [[ -f "$STATE/dnsmasq.log" ]]; then tail -15 "$STATE/dnsmasq.log" >&2; fi
     if [[ -f "$STATE/dnsmasq.pid" ]]; then kill "$(cat "$STATE/dnsmasq.pid")" 2>/dev/null || true; fi
     if [[ -f "$STATE/hostapd.pid" ]]; then kill "$(cat "$STATE/hostapd.pid")" 2>/dev/null || true; fi
-    ip addr del 192.168.10.1/24 dev "$IFACE" 2>/dev/null || true
+    ip addr del 192.168.50.1/24 dev "$IFACE" 2>/dev/null || true
     nmcli device set "$IFACE" managed yes || true
     nmcli device set "$IFACE" autoconnect yes || true
     if [[ -n "$UUID" ]]; then nmcli --wait 30 connection up uuid "$UUID" ifname "$IFACE" || true; fi
@@ -51,7 +51,7 @@ ip link set "$IFACE" down
 ip addr flush dev "$IFACE"
 sleep 2
 ip link set "$IFACE" up
-ip addr add 192.168.10.1/24 dev "$IFACE"
+ip addr add 192.168.50.1/24 dev "$IFACE"
 : > "$STATE/hostapd.log"
 : > "$STATE/dnsmasq.log"
 hostapd -B -P "$STATE/hostapd.pid" -f "$STATE/hostapd.log" "$ROOT/config/hostapd.conf" 9>&-
@@ -66,5 +66,5 @@ kill -0 "$(cat "$STATE/dnsmasq.pid")"
 touch "$STATE/active"
 rm -f "$STATE/transition"
 trap - ERR INT TERM
-echo "ARDA_NET 준비 완료: 192.168.10.1/24"
+echo "ARDA_NET 준비 완료: 192.168.50.1/24"
 echo "로그: $STATE/hostapd.log, $STATE/dnsmasq.log"

@@ -19,7 +19,7 @@ stop_pid() {
 stop_pid "$STATE/dnsmasq.pid" dnsmasq
 stop_pid "$STATE/hostapd.pid" hostapd
 if [[ -d "/sys/class/net/$IFACE" ]]; then
-    ip addr del 192.168.10.1/24 dev "$IFACE" 2>/dev/null || true
+    ip addr del 192.168.50.1/24 dev "$IFACE" 2>/dev/null || true
     nmcli device set "$IFACE" managed yes
     nmcli device set "$IFACE" autoconnect yes
 fi

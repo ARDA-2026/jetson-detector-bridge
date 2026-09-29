@@ -29,7 +29,7 @@ jetson/
 ├── config/
 │   ├── runtime.env          # 웹 주소, 설치 좌표, 장치 포트, 실행 옵션
 │   ├── hostapd.conf         # ARDA_NET / WPA2
-│   └── dnsmasq.conf         # Windows에 192.168.10.10~100 할당
+│   └── dnsmasq.conf         # Windows에 192.168.50.10~100 할당
 ├── scripts/
 │   ├── run_sensor.sh        # arda-raset 실행
 │   ├── set_report_url.sh    # Windows IP를 실행 중 서비스에 임시 적용
@@ -117,7 +117,7 @@ systemctl status arda-jetson.service --no-pager
 
 ## 4. 시연: Windows와 연결하기
 
-아래 IP `192.168.10.49`는 **예시**입니다. 매 시연에서 Windows가 받은 실제 주소를 사용하세요. AP 대신 기존 Wi-Fi를 함께 사용할 경우에도 두 장치가 같은 네트워크에 있어야 하며, Windows가 그 네트워크에서 받은 IPv4 주소를 사용합니다.
+아래 IP `192.168.50.49`는 **예시**입니다. 매 시연에서 Windows가 받은 실제 주소를 사용하세요. AP 대신 기존 Wi-Fi를 함께 사용할 경우에도 두 장치가 같은 네트워크에 있어야 하며, Windows가 그 네트워크에서 받은 IPv4 주소를 사용합니다.
 
 ### STEP 1 — Jetson AP 시작
 
@@ -132,7 +132,7 @@ iw dev wlP1p1s0 info
 sudo tail -30 /run/arda-demo/hostapd.log
 ```
 
-**정상 결과:** `ARDA_NET 준비 완료`가 출력됩니다. Wi-Fi 장치는 `unmanaged`, 주소는 `192.168.10.1/24`, `iw`는 `type AP`, hostapd 로그는 `AP-ENABLED`를 보여줍니다. 센서 서비스는 계속 `active`입니다.
+**정상 결과:** `ARDA_NET 준비 완료`가 출력됩니다. Wi-Fi 장치는 `unmanaged`, 주소는 `192.168.50.1/24`, `iw`는 `type AP`, hostapd 로그는 `AP-ENABLED`를 보여줍니다. 센서 서비스는 계속 `active`입니다.
 
 **문제 시 확인:** 시작 출력의 `시작 실패 (줄 …)`, hostapd 로그, `journalctl -u arda-jetson.service -b -n 80`을 확인합니다. AP만 종료하고 Wi-Fi로 돌아가려면:
 
@@ -154,12 +154,14 @@ sudo ./scripts/demo_stop.sh
 
 ```powershell
 ipconfig /all
-ping 192.168.10.1
+ping 192.168.50.1
 ```
 
-> **⚠️ 중요 — 인터넷 상태 표시와 AP 연결은 다릅니다.** 이 AP는 인터넷을 제공하지 않습니다. Windows가 “인터넷 없음”, “인터넷에 연결되지 않음” 또는 제한된 연결처럼 표시해도 **Wi-Fi 어댑터의 IPv4가 `192.168.10.x`이고 Jetson(`192.168.10.1`)으로 ping이 되면 로컬 연결은 성공**입니다. Windows의 인터넷 표시만 보고 실패로 판단하지 마세요.
+> **⚠️ 중요 — 인터넷 상태 표시와 AP 연결은 다릅니다.** 이 AP는 인터넷을 제공하지 않습니다. Windows가 “인터넷 없음”, “인터넷에 연결되지 않음” 또는 제한된 연결처럼 표시해도 **Wi-Fi 어댑터의 IPv4가 `192.168.50.x`이고 Jetson(`192.168.50.1`)으로 ping이 되면 로컬 연결은 성공**입니다. Windows의 인터넷 표시만 보고 실패로 판단하지 마세요.
 
-**정상 결과:** `ARDA_NET`에 연결된 **Wi-Fi 어댑터**의 IPv4가 `192.168.10.10`~`192.168.10.100`, 서브넷 마스크가 `255.255.255.0`, DHCP 서버가 `192.168.10.1`입니다. `ping`에 응답이 옵니다. **Windows IPv4 주소를 기록하세요.** 예: `192.168.10.49`. 다음 STEP에서 웹 전송 주소로 사용합니다.
+노트북에서 Jetson에 SSH로 접속할 때는 `ssh orin@192.168.50.1`을 사용합니다. 센서가 노트북으로 보낼 주소는 아래에서 확인한 **노트북의 Wi-Fi IPv4**를 사용하세요.
+
+**정상 결과:** `ARDA_NET`에 연결된 **Wi-Fi 어댑터**의 IPv4가 `192.168.50.10`~`192.168.50.100`, 서브넷 마스크가 `255.255.255.0`, DHCP 서버가 `192.168.50.1`입니다. `ping`에 응답이 옵니다. **Windows IPv4 주소를 기록하세요.** 예: `192.168.50.49`. 다음 STEP에서 웹 전송 주소로 사용합니다.
 
 **문제 시 확인:** `169.254.x.x`면 DHCP 실패입니다. Jetson에서 아래 로그를 확인합니다.
 
@@ -192,19 +194,19 @@ netsh advfirewall firewall add rule name="ARDA hanriver" dir=in action=allow pro
 
 ### STEP 4 — Windows 주소를 Jetson에 등록
 
-**실행 — Jetson:** STEP 2에서 기록한 주소가 `192.168.10.49`라면 설정 파일을 열 필요 없이 다음처럼 입력합니다.
+**실행 — Jetson:** STEP 2에서 기록한 주소가 `192.168.50.49`라면 설정 파일을 열 필요 없이 다음처럼 입력합니다.
 
 ```bash
 cd ~/ARDA-2026/jetson
-./scripts/set_report_url.sh http://192.168.10.49:8000/report
-curl -m 3 http://192.168.10.49:8000/state
+./scripts/set_report_url.sh http://192.168.50.49:8000/report
+curl -m 3 http://192.168.50.49:8000/state
 journalctl -u arda-jetson.service -b -n 40 --no-pager
 ```
 
 `set_report_url.sh`는 센서 서비스를 재시작하며 주소를 `/run/arda-jetson/report-url`에 임시 저장합니다. `stop_demo.sh` 또는 재부팅 후에는 지워집니다. **센서를 서비스 없이 수동으로 실행한다면** 다음처럼 `--report-url` 인자를 직접 전달합니다.
 
 ```bash
-./scripts/run_sensor.sh --report-url http://192.168.10.49:8000/report
+./scripts/run_sensor.sh --report-url http://192.168.50.49:8000/report
 ```
 
 부팅 후에도 같은 주소를 계속 쓰고 싶을 때만 `config/runtime.env`의 `ARDA_REPORT_URL`을 수정하세요. Windows IP는 DHCP로 바뀔 수 있으므로 시연마다 `ipconfig`로 다시 확인하는 편이 안전합니다.
@@ -225,7 +227,7 @@ ip -4 addr show dev wlP1p1s0
 systemctl status arda-jetson.service --no-pager
 ```
 
-**정상 결과:** `AP 종료 및 NetworkManager 복귀 완료`가 표시됩니다. Wi-Fi 장치가 이전 SSID·UUID에 다시 `connected`, `192.168.10.1`은 제거, 센서 서비스는 `inactive`입니다.
+**정상 결과:** `AP 종료 및 NetworkManager 복귀 완료`가 표시됩니다. Wi-Fi 장치가 이전 SSID·UUID에 다시 `connected`, `192.168.50.1`은 제거, 센서 서비스는 `inactive`입니다.
 
 **문제 시 확인:** `sudo ./scripts/demo_stop.sh`를 다시 실행합니다. 원래 Wi-Fi가 범위 밖이거나 인증이 만료됐다면 수동으로 재연결해야 합니다. 저장된 UUID는 `/run/arda-demo/wifi.uuid`, NetworkManager 로그는 `journalctl -u NetworkManager -b`에서 확인합니다.
 
